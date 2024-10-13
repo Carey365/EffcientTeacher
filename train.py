@@ -30,7 +30,7 @@ WORLD_SIZE = int(os.getenv('WORLD_SIZE', 1))
 
 def parse_opt(known=False):
     parser = argparse.ArgumentParser()
-    parser.add_argument('--cfg', type=str, default='', help='model.yaml path')
+    parser.add_argument('--cfg', type=str, default='configs/ssod/coco-standard/yolov5l_coco_ssod_10_percent.yaml', help='model.yaml path')
     parser.add_argument("opts",help="Modify config options using the command-line",default=None,nargs=argparse.REMAINDER)
     parser.add_argument('--local_rank', type=int, default=-1, help='DDP parameter, do not modify')
 
@@ -46,7 +46,8 @@ def setup(cfg):
  
     cfg.save_dir = str(increment_path(Path(cfg.project) / cfg.name, exist_ok=cfg.exist_ok))
 
-    # DDP mode
+
+    # DDP mode （Distributed Data Parallel）
     device = select_device(cfg.device, batch_size=cfg.Dataset.batch_size)
     if LOCAL_RANK != -1:
         timeout=timedelta(seconds=86400)
@@ -69,11 +70,16 @@ def main(opt, callbacks=Callbacks()):
     device = setup(cfg)
     cfg.freeze()
     if cfg.SSOD.train_domain:
+        LOGGER.info(f"cfg: {cfg}")
+        LOGGER.info(f"device: {device}")
+        LOGGER.info(f"LOCAL_RANK: {LOCAL_RANK}")
+        LOGGER.info(f"RANK: {RANK}")
+        LOGGER.info(f"WORLD_SIZE: {WORLD_SIZE}")
         trainer = SSODTrainer(cfg, device, callbacks, LOCAL_RANK, RANK, WORLD_SIZE)
     else:
         trainer = Trainer(cfg, device, callbacks, LOCAL_RANK, RANK, WORLD_SIZE)
         
-    trainer.train(callbacks, val)
+    # trainer.train(callbacks, val)
     if WORLD_SIZE > 1 and RANK == 0:
         LOGGER.info('Destroying process group... ')
         # dist.destroy_process_group()
