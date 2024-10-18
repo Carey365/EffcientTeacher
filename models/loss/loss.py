@@ -389,7 +389,7 @@ class TargetLoss():
         # print('target_index:',target_index)
 
         # domain label
-        domain_t = Variable(torch.ones(out_d_t.size(0)).long().cuda())
+        domain_t = torch.zeros(out_d_t.size(0), dtype=torch.long, device=torch.device('cpu'))
         dloss_t = 0.5 * self.fl(out_d_t, domain_t)
         # print('dloss_t:', dloss_t)
         return dloss_t
@@ -414,8 +414,11 @@ class DomainLoss():
         out_d_s = torch.cat((out_d_s_8, out_d_s_16, out_d_s_32), 0)
         # print('out_d_s:', out_d_s.shape)
 
+        # # domain label
+        # domain_s = Variable(torch.zeros(out_d_s.size(0)).long().cuda())
+
         # domain label
-        domain_s = Variable(torch.zeros(out_d_s.size(0)).long().cuda())
+        domain_s = torch.zeros(out_d_s.size(0), dtype=torch.long, device=torch.device('cpu'))
         # global alignment loss
         dloss_s = 0.5 * self.fl(out_d_s, domain_s)
         return dloss_s

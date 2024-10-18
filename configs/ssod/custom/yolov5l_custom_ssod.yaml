@@ -44,7 +44,7 @@ Loss:
 Dataset:
   data_name: 'coco'
   train: data/custom_train.txt  # 118287 images
-  val: data/custom_val.txt  # 5000 images
+  val: data/coco/val2017.txt  # 5000 images
   test: data/custom_val.txt # 20288 of 40670 images, submit to https://competitions.codalab.org/competitions/20794^
   target: data/custom_unlabeled.txt
   nc: 2  # number of classes

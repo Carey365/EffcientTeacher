@@ -75,11 +75,14 @@ def main(opt, callbacks=Callbacks()):
         LOGGER.info(f"LOCAL_RANK: {LOCAL_RANK}")
         LOGGER.info(f"RANK: {RANK}")
         LOGGER.info(f"WORLD_SIZE: {WORLD_SIZE}")
-        trainer = SSODTrainer(cfg, device, callbacks, LOCAL_RANK, RANK, WORLD_SIZE)
+        try:
+            trainer = SSODTrainer(cfg, device, callbacks, LOCAL_RANK, RANK, WORLD_SIZE)
+        except Exception as e:
+            print(f"An error occurred: {e}")
     else:
         trainer = Trainer(cfg, device, callbacks, LOCAL_RANK, RANK, WORLD_SIZE)
         
-    # trainer.train(callbacks, val)
+    trainer.train(callbacks, val)
     if WORLD_SIZE > 1 and RANK == 0:
         LOGGER.info('Destroying process group... ')
         # dist.destroy_process_group()

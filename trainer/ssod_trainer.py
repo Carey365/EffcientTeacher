@@ -17,7 +17,8 @@ import torch
 import torch.distributed as dist
 import torch.nn as nn
 # import yaml
-from torch.cuda import amp
+# from torch.cuda import amp
+from torch import amp
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.optim import Adam, AdamW, SGD, lr_scheduler
 from tqdm import tqdm
@@ -265,7 +266,7 @@ class SSODTrainer(Trainer):
     def update_train_logger(self):
         for (imgs, targets, paths, _) in self.train_loader:  # batch -------------------------------------------------------------
             imgs = imgs.to(self.device, non_blocking=True).float() / self.norm_scale  # uint8 to float32, 0-255 to 0.0-1.0
-            with amp.autocast(enabled=self.cuda):
+            with amp.autocast('cuda',enabled=self.cuda):
                 pred, sup_feats = self.model(imgs)  # forward
                 loss, loss_items = self.compute_loss(pred, targets.to(self.device))  # loss scaled by batch_size
                 if self.model_type in ['yolox', 'tal']:
@@ -592,7 +593,7 @@ class SSODTrainer(Trainer):
 
         # Teacher Model Forward
         extra_teacher_outs = []
-        with amp.autocast(enabled=self.cuda):
+        with amp.autocast('cuda',enabled=self.cuda):
             #build pseudo label via pred from teacher model
             with torch.no_grad():
                 if self.model_type in ['yolov5']:
@@ -622,7 +623,7 @@ class SSODTrainer(Trainer):
 
         total_imgs = torch.cat([imgs, unlabeled_imgs], 0)
         
-        with amp.autocast(enabled=self.cuda):
+        with amp.autocast('cuda',enabled=self.cuda):
             total_pred, total_feature = self.model(total_imgs)  # forward
             sup_pred, sup_feature, un_sup_pred, un_sup_feature = self.split_predict_and_feature(total_pred, total_feature, n_img)
             sup_loss, sup_loss_items = self.compute_loss(sup_pred, targets.to(self.device)) 
